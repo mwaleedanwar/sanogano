@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg473"
+   xml:space="preserve"
+   width="200"
+   height="200"
+   viewBox="0 0 200 200"
+   sodipodi:docname="Folder.ai.svg"
+   inkscape:version="1.1 (c4e8f9e, 2021-05-24)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs477"><clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath487"><path
+         d="M 0,150 H 150 V 0 H 0 Z"
+         id="path485" /></clipPath></defs><sodipodi:namedview
+     id="namedview475"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:zoom="2.78"
+     inkscape:cx="100"
+     inkscape:cy="100"
+     inkscape:window-width="1307"
+     inkscape:window-height="778"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="g479" /><g
+     id="g479"
+     inkscape:groupmode="layer"
+     inkscape:label="Folder"
+     transform="matrix(1.3333333,0,0,-1.3333333,0,200)"><g
+       id="g481"><g
+         id="g483"
+         clip-path="url(#clipPath487)"><g
+           id="g489"
+           transform="translate(15.812,25.238)"><path
+             d="m 0,0 c -3.205,0 -5.812,2.607 -5.812,5.812 v 56.831 h 130 V 5.812 C 124.188,2.607 121.581,0 118.376,0 Z m -5.812,93.712 c 0,3.205 2.607,5.812 5.812,5.812 h 20.301 c 2.42,0 4.788,-0.838 6.668,-2.36 L 33.83,91.61 c 3.35,-2.712 7.568,-4.205 11.877,-4.205 h 72.669 c 3.205,0 5.812,-2.607 5.812,-5.811 v -8.951 h -130 z m 124.188,3.694 H 45.707 c -2.033,0 -4.005,0.698 -5.585,1.977 l -6.86,5.553 c -3.667,2.969 -8.242,4.588 -12.961,4.588 H 0 c -8.733,0 -15.812,-7.079 -15.812,-15.812 V 72.643 62.643 5.811 C -15.812,-2.921 -8.733,-10 0,-10 h 116.76 1.616 c 6.094,0 11.373,3.452 14.013,8.502 1.144,2.187 1.799,4.67 1.799,7.309 v 56.832 10 8.951 c 0,8.732 -7.079,15.812 -15.812,15.812"
+             style="fill:#42538d;fill-opacity:1;fill-rule:nonzero;stroke:none"
+             id="path491" /></g></g></g></g></svg>

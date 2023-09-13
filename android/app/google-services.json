@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "691971459258",
+    "project_id": "sanogano-bf152",
+    "storage_bucket": "sanogano-bf152.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:691971459258:android:56018baf22fb73d86d1a83",
+        "android_client_info": {
+          "package_name": "com.flavorstack.sano_gano"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "691971459258-borju63ncogdhvl5pu7jns7a2q6lhv10.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.flavorstack.sano_gano",
+            "certificate_hash": "d847d56ff500dd6a19dc09e79e2cb953f1208c97"
+          }
+        },
+        {
+          "client_id": "691971459258-dd81a4bgt1v460ldqv9q6ln2igg1cu4p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZ2xOwfbetMXReQSeymBu9EQdhDaHudpM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "691971459258-dd81a4bgt1v460ldqv9q6ln2igg1cu4p.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "691971459258-2kcqnvbdjqiu5qq7kif18jbhuhl1r5po.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.flavorstack.SanoGano"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

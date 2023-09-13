@@ -1,0 +1,678 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:sano_gano/const/iconAssetStrings.dart';
+import 'package:sano_gano/controllers/auth_controller.dart';
+import 'package:sano_gano/controllers/chat_controller.dart';
+import 'package:sano_gano/controllers/follow_controller.dart';
+import 'package:sano_gano/controllers/postController.dart';
+import 'package:sano_gano/controllers/profile_controller.dart';
+import 'package:sano_gano/controllers/user_controller.dart';
+import 'package:sano_gano/models/user.dart';
+import 'package:sano_gano/services/user_database.dart';
+import 'package:sano_gano/utils/database.dart';
+import 'package:sano_gano/utils/globalHelperMethods.dart';
+import 'package:sano_gano/view/global/custom_appbar.dart';
+import 'package:sano_gano/view/global/custom_icon.dart';
+import 'package:sano_gano/view/global/space.dart';
+import 'package:sano_gano/view/pages/chat/single_chat.dart';
+import 'package:sano_gano/view/pages/profile/settings.dart';
+import 'package:sano_gano/view/pages/profile/user_profile.dart';
+import 'package:sano_gano/view/pages/profile/widgets/profile_image.dart';
+import 'package:sano_gano/view/widgets/cookbook_page.dart';
+import 'package:sano_gano/view/widgets/createRecipe.dart';
+import 'package:sano_gano/view/widgets/create_post.dart';
+import 'package:sano_gano/view/widgets/create_workout.dart';
+import 'package:sano_gano/view/widgets/gym_page.dart';
+import 'package:sano_gano/view/widgets/popup_menu_builder.dart';
+
+import 'otherProfile.dart';
+
+class ProfilePage extends StatelessWidget {
+  String userID;
+  final Function() healthCallback;
+
+  var scrollControllers = [
+    ScrollController(),
+    ScrollController(),
+    ScrollController(),
+    ScrollController(),
+    ScrollController(),
+  ];
+  final bool hideBack;
+  ProfilePage(this.userID, {this.healthCallback, this.hideBack = false});
+  final db = Database();
+  @override
+  Widget build(BuildContext context) {
+    print(Get.find<AuthController>().user.uid);
+    print(userID);
+    if (Get.find<AuthController>().user.uid != userID) {
+      return OtherUserProfile(userID);
+    }
+    var format = DateFormat("MMMM d, y");
+
+    Widget _buildBioText(String bio) {
+      if (isNullOrBlank(bio)) {
+        return Container();
+      }
+      if (bio == null) {
+        return Text(
+          "bio",
+          style: TextStyle(color: Colors.grey),
+        );
+      } else {
+        if (bio.length == 0) {
+          return Text(
+            "bio",
+            style: TextStyle(color: Colors.grey),
+          );
+        } else {
+          return Text(
+            bio,
+            softWrap: true,
+            maxLines: 2,
+            style: TextStyle(height: 1.5),
+            textAlign: TextAlign.center,
+          );
+        }
+      }
+    }
+
+    Widget _buildWebsiteText(String website) {
+      if (isNullOrBlank(website)) {
+        return Container();
+      }
+      if (website == null) {
+        return Text(
+          "website",
+          style: TextStyle(color: Colors.grey),
+        );
+      } else {
+        if (website.length == 0) {
+          return Text(
+            "website",
+            style: TextStyle(color: Colors.grey),
+          );
+        } else {
+          return Text(
+            website,
+            style: TextStyle(
+              color: Color(0xFF5879EE),
+            ),
+          );
+        }
+      }
+    }
+
+    return DefaultTabController(
+      length: 5,
+      child: GetX<UserController>(
+        builder: (UserController controller) {
+          var _myID = Get.find<AuthController>().user.uid;
+          var _myProfile = true;
+
+          controller.getCurrentUser(userID);
+          if (controller != null && controller.userModel != null) {
+            var _user = controller.userModel;
+            _myProfile = controller.userModel.id == _myID;
+
+            return Scaffold(
+              // backgroundColor: Colors.white, TODO fix dark theme
+              appBar: CustomAppBar(
+                back: !hideBack || !_myProfile,
+                leading: buildPopupMenu([
+                  PopupItem(
+                      callback: () => Get.to(CreatePost()),
+                      index: 0,
+                      title: "Create Post"),
+                  PopupItem(
+                      callback: () => createRecipe(),
+                      index: 1,
+                      title: "Create Recipe"),
+                  PopupItem(
+                      callback: () => createWorkout(),
+                      index: 2,
+                      title: "Create Workout"),
+                ], icon: addIcon),
+                title: _user.username ?? "Username",
+                iconButton: _myProfile && hideBack
+                    ? InkWell(
+                        onTap: () {
+                          Get.to(() => SettingsPage());
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20.0, vertical: 5),
+                          child: settingsDIcon,
+                        ),
+                      )
+                    : Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                        child: Container(),
+                      ),
+              ),
+              body: DefaultTabController(
+                length: 5,
+                child: NestedScrollView(
+                  scrollBehavior: ScrollBehavior(
+                      androidOverscrollIndicator:
+                          AndroidOverscrollIndicator.stretch),
+                  physics: ClampingScrollPhysics(),
+                  // allows you to build a list of elements that would be scrolled away till the body reached the top
+                  headerSliverBuilder: (context, _) {
+                    return [
+                      SliverList(
+                        delegate: SliverChildListDelegate([
+                          Container(
+                            constraints:
+                                BoxConstraints(maxHeight: Get.height * 0.25),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Positioned(
+                                  top: 0,
+                                  left: 0,
+                                  right: 0,
+                                  child: controller.userModel.bannerURL
+                                              ?.isNotEmpty ??
+                                          false
+                                      ? OptimizedCacheImage(
+                                          imageUrl:
+                                              controller.userModel.bannerURL,
+                                          height: 120,
+                                          fit: BoxFit.fill,
+                                        )
+                                      : Image.asset(
+                                          "assets/banner.png",
+                                          height: 120,
+                                          fit: BoxFit.fill,
+                                        ),
+                                ),
+                                Positioned(
+                                  top: 65,
+                                  child: ProfileImage(
+                                    _user.profileURL,
+                                    _user.id,
+                                    _user.username,
+                                    _user.followers ?? 0,
+                                    _user.following ?? 0,
+                                    _user.name,
+                                    healthCallback: healthCallback,
+                                  ),
+                                ),
+                                // Positioned(
+                                //   top: 235,
+                                //   child: Container(
+                                //     child: Column(
+                                //       children: [
+                                //         Text(
+                                //           _user.name ?? "Name",
+                                //           style: TextStyle(
+                                //               fontSize: 16,
+                                //               color: Colors.black,
+                                //               fontWeight: FontWeight.bold),
+                                //         ),
+                                //         addHeight(5.0),
+                                //         Container(
+                                //             width: Get.width * 0.8,
+                                //             child: _buildBioText(_user.bio)),
+                                //         addHeight(5.0),
+                                //         _buildWebsiteText(_user.website),
+                                //         addHeight(7.5),
+                                //         Text(
+                                //           "ESTABLISHED " +
+                                //               format
+                                //                   .format(_user.established ??
+                                //                       DateTime.now())
+                                //                   .toUpperCase(),
+                                //           style: TextStyle(fontSize: 10),
+                                //         ),
+                                //         // addHeight(5),
+
+                                //         //Follow And Message For Other Users
+                                //         !_myProfile
+                                //             ? UserProfile(
+                                //                 userID,
+                                //                 userModel: _user,
+                                //               )
+                                //             : Container(
+                                //                 padding: EdgeInsets.zero,
+                                //               ),
+                                //       ],
+                                //     ),
+                                //   ),
+                                // ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            child: Column(
+                              children: [
+                                Text(
+                                  _user.name ?? "Name",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                addHeight(5.0),
+                                Container(
+                                    width: Get.width * 0.8,
+                                    child: _buildBioText(_user.bio)),
+                                addHeight(5.0),
+                                _buildWebsiteText(_user.website),
+                                addHeight(7.5),
+                                Text(
+                                  "ESTABLISHED " +
+                                      format
+                                          .format(_user.established ??
+                                              DateTime.now())
+                                          .toUpperCase(),
+                                  style: TextStyle(fontSize: 10),
+                                ),
+                                // addHeight(5),
+
+                                //Follow And Message For Other Users
+                                !_myProfile
+                                    ? UserProfile(
+                                        userID,
+                                        userModel: _user,
+                                      )
+                                    : Container(
+                                        padding: EdgeInsets.zero,
+                                      ),
+                              ],
+                            ),
+                          ),
+                        ]),
+                      ),
+                    ];
+                  },
+                  // You tab view goes here
+
+                  body: GetBuilder<PostController>(
+                    init: PostController(),
+                    initState: (_) {},
+                    builder: (postController) {
+                      return Column(
+                        children: <Widget>[
+                          SizedBox(
+                            height: 50,
+                            child: AppBar(
+                              elevation: 0.0,
+                              // backgroundColor: Colors.white,//TODO fix dark theme
+                              bottom: TabBar(
+                                onTap: (value) {
+                                  scrollControllers[value].animateTo(0.0,
+                                      duration: Duration(seconds: 1),
+                                      curve: Curves.easeIn);
+                                },
+                                automaticIndicatorColorAdjustment: true,
+                                indicatorColor: Get.isDarkMode == true
+                                    ? Colors.white
+                                    : Colors.black,
+                                labelPadding:
+                                    EdgeInsets.symmetric(horizontal: 5),
+                                // labelColor: Colors.black,
+                                //indicatorColor: Colors.black,
+                                labelStyle: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold),
+                                unselectedLabelStyle: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.black,
+                                ),
+                                tabs: [
+                                  Tab(
+                                    text: "All",
+                                  ),
+                                  Tab(
+                                    text: "Media",
+                                  ),
+                                  Tab(
+                                    text: "Recipe",
+                                  ),
+                                  Tab(
+                                    text: "Workout",
+                                  ),
+                                  Tab(
+                                    text: "Tagged",
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(top: 4.0),
+                              child: TabBarView(
+                                physics: ClampingScrollPhysics(),
+                                children: [
+                                  postController.getPaginatedPosts(
+                                    db.postsCollection
+                                        .where('ownerId', isEqualTo: _myID)
+                                        .orderBy('timestamp', descending: true),
+                                    scrollController: scrollControllers[0],
+                                  ),
+                                  postController.getPaginatedPosts(
+                                    db.postsCollection
+                                        .where('ownerId', isEqualTo: _myID)
+                                        .where('postAttachmentUrl',
+                                            isNotEqualTo: "")
+                                        .orderBy('postAttachmentUrl',
+                                            descending: true)
+                                        .orderBy('timestamp', descending: true),
+                                    scrollController: scrollControllers[1],
+                                  ),
+                                  postController.getPaginatedPosts(
+                                    db.postsCollection
+                                        .where('ownerId', isEqualTo: _myID)
+                                        .where('attachedRecipeId',
+                                            isNotEqualTo: "")
+                                        .orderBy('attachedRecipeId',
+                                            descending: true)
+                                        .orderBy('timestamp', descending: true),
+                                    scrollController: scrollControllers[2],
+                                  ),
+                                  postController.getPaginatedPosts(
+                                    db.postsCollection
+                                        .where('ownerId', isEqualTo: _myID)
+                                        .where('attachedWorkoutId',
+                                            isNotEqualTo: "")
+                                        .orderBy('attachedWorkoutId',
+                                            descending: true)
+                                        .orderBy(
+                                          'timestamp',
+                                          descending: true,
+                                        ),
+                                    scrollController: scrollControllers[3],
+                                  ),
+                                  postController.getPaginatedPosts(
+                                      db.postsCollection
+                                          .where('taggedUsers',
+                                              arrayContains: _myID)
+                                          .orderBy('timestamp'),
+                                      scrollController: scrollControllers[4]),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          } else {
+            return Center(
+              child: SpinKitCircle(
+                size: 25,
+                color: Colors.black,
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  void createWorkout() async {
+    var result = await showImagePicker(Get.context,
+        skipMode: true, squareMode: true, workoutMode: true, onSkip: () {
+      Get.to(CreateWorkout(
+        workoutImage: null,
+        skipMode: true,
+      ));
+    });
+
+    if (result != null)
+      Get.to(CreateWorkout(
+        workoutImage: result,
+      ));
+  }
+
+  void createRecipe() async {
+    var result = await showImagePicker(Get.context,
+        squareMode: true, recipeMode: true, skipMode: true, onSkip: () {
+      Get.to(CreateRecipe(
+        recipeImage: null,
+        skipMode: true,
+      ));
+    });
+
+    if (result != null)
+      Get.to(CreateRecipe(
+        recipeImage: result,
+      ));
+  }
+}
+
+/*class ProfilePage extends StatelessWidget {
+
+  String userID;
+  ProfilePage(this.userID);
+
+  @override
+  Widget build(BuildContext context) {
+    var format = DateFormat("MMMM d, y");
+
+    Widget _buildBioText(String bio) {
+      if (bio == null) {
+        return Text(
+          "bio",
+          style: TextStyle(color: Colors.grey),
+        );
+      } else {
+        if (bio.length == 0) {
+          return Text(
+            "bio",
+            style: TextStyle(color: Colors.grey),
+          );
+        } else {
+          return Text(bio);
+        }
+      }
+    }
+
+    Widget _buildWebsiteText(String website) {
+      if (website == null) {
+        return Text(
+          "website",
+          style: TextStyle(color: Colors.grey),
+        );
+      } else {
+        if (website.length == 0) {
+          return Text(
+            "website",
+            style: TextStyle(color: Colors.grey),
+          );
+        } else {
+          return Text(
+            website,
+            style: TextStyle(
+              color: Colors.blue,
+            ),
+          );
+        }
+      }
+    }
+
+    return DefaultTabController(
+      length: 5,
+
+      child: GetX<UserController>(
+        init: Get.put(UserController()),
+        builder: (UserController controller) {
+
+          var _myID = Get.find<AuthController>().user.uid;
+          var _myProfile = true;
+
+          controller.getCurrentUser(userID);
+           if(controller != null && controller.userModel != null) {
+
+             var _user = controller.userModel;
+             _myProfile = controller.userModel.id == _myID;
+
+             return Scaffold(
+               backgroundColor: Colors.white,
+               appBar: CustomAppBar(
+                 back: !_myProfile,
+                 title: _user.username ?? "Username",
+                 iconButton: _myProfile
+                     ? InkWell(
+                   onTap: () {
+                     Get.to(() => SettingsPage());
+                   },
+                   child: Padding(
+                     padding: const EdgeInsets.symmetric(
+                         horizontal: 20.0, vertical: 5),
+                     child: CustomIcon("assets/icons/setting.svg", 20),
+                   ),
+                 )
+                     : Padding(
+                   padding: EdgeInsets.symmetric(
+                       horizontal: 20, vertical: 5),
+                   child: Container(),
+                 ),
+               ),
+               body: Column(
+                 children: [
+                   Container(
+                     height: !_myProfile ? 400 : 350 ,
+                     child: Stack(
+                       alignment: Alignment.center,
+                       children: [
+                         Positioned(
+                             top: 0,
+                             left: 0,
+                             right: 0,
+                             child: Image.asset(
+                               "assets/images/cover.png",
+                               height: 120,
+                               fit: BoxFit.fill,
+                             )),
+                         Positioned(
+                           top: 75,
+                           child: ProfileImage(
+                               _user.profileURL,
+                               _user.id,
+                               _user.username,
+                               _user.followers ?? 0,
+                               _user.following ?? 0),
+                         ),
+                         Positioned(
+                           top: 250,
+                           child: Container(
+                             child: Column(
+                               children: [
+                                 Text(
+                                   _user.name ?? "Name",
+                                   style: TextStyle(
+                                       fontSize: 18,
+                                       color: Colors.black,
+                                       fontWeight: FontWeight.bold),
+                                 ),
+                                 addHeight(5.0),
+                                 _buildBioText(_user.bio),
+                                 addHeight(5.0),
+                                 _buildWebsiteText(_user.website),
+                                 addHeight(5.0),
+                                 Text("ESTABLISHED " +
+                                     format.format(
+                                         _user.established ??
+                                             DateTime.now()).toUpperCase()),
+                                 addHeight(5),
+
+                                 ///Follow And Message For Other Users
+                                 !_myProfile
+                                     ? UserProfile(userID)
+                                     : Container(),
+                               ],
+                             ),
+                           ),
+                         ),
+                       ],
+                     ),
+                   ),
+                   SizedBox(
+                     height: 50,
+                     child: AppBar(
+                       elevation: 0.0,
+                       backgroundColor: Colors.white,
+                       bottom: TabBar(
+                         labelColor: Colors.black,
+                         indicatorColor: Colors.black,
+                         labelStyle: TextStyle(fontSize: 12,color: Colors.black,fontWeight: FontWeight.bold),
+                         unselectedLabelStyle: TextStyle(fontSize: 12,color: Colors.black,),
+                         tabs: [
+                           Tab(
+                             text: "ALL",
+                           ),
+                           Tab(
+                             text: "Media",
+                           ),
+                           Tab(
+                             text: "Recipe",
+                           ),
+                           Tab(
+                             text: "Workout",
+                           ),
+                           Tab(
+                             text: "Tagged",
+                           ),
+                         ],
+                       ),
+                     ),
+                   ),
+                   Expanded(
+                     child: TabBarView(
+                       children: [
+                         Center(
+                           child: Text(
+                             'All',
+                           ),
+                         ),
+                         Center(
+                           child: Text(
+                             'Media',
+                           ),
+                         ),
+                         Center(
+                           child: Text(
+                             'Recipe',
+                           ),
+                         ),
+                         Center(
+                           child: Text(
+                             'Workout',
+                           ),
+                         ),
+                         Center(
+                           child: Text(
+                             'Tagged',
+                           ),
+                         ),
+                       ],
+                     ),
+                   ),
+                 ],
+               ),
+             );
+           }else {
+            return Center(
+               child: SpinKitCircle(
+                 size: 25,
+                 color: Colors.black,
+               ),
+             );
+           }
+        },
+      ),
+    );
+  }
+}*/
